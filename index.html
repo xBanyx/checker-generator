@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <title>Simple Divisibility Finder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { 
       font-family: Arial, sans-serif; 
@@ -39,7 +40,7 @@
       border-color: #2563eb;
       box-shadow: 0 0 4px #a9c4ff;
     }
-    .row { display:flex; gap:10px; align-items:center; }
+    .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
     .row .small { width: 140px; }
     button { 
       margin-top: 12px; 
@@ -70,6 +71,7 @@
       font-size: 16px;
       line-height: 1.6;
       min-height:44px;
+      overflow-x:auto;
     }
     .tips {
       background: #fff7da;
@@ -78,7 +80,22 @@
     }
     .answers-row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
     .answer-pill { padding:8px 12px; background:#fff; border-radius:20px; border:1px solid #d6e2ff; font-weight:600; }
-    small.note { color:#445; display:block; margin-top:8px }
+    small.note { color:#445; display:block; margin-top:8px; }
+
+    /* Mobile-only design */
+    @media (max-width: 480px) {
+      .box { padding: 20px; background: #f0f5f9; border-radius: 16px; border: 2px solid #d0e0f5; }
+      h2 { font-size: 22px; color: #0a2a66; }
+      h3 { font-size: 20px; color: #0a2a66; }
+      input[type=text], input[type=number] { font-size: 16px; padding: 10px; border-radius: 8px; border: 1px solid #a0b8d8; }
+      button { font-size: 16px; padding: 12px; border-radius: 12px; width: 100%; }
+      button.secondary { background: #4b5563; }
+      .row { flex-direction: column; gap: 10px; }
+      .answers-row { justify-content: flex-start; }
+      .result { background: #dbeeff; border-left: 4px solid #60a5fa; font-size: 15px; }
+      .tips { background: #fff9e6; border-left: 5px solid #ffc107; border-top: 1px solid #ffe59d; font-size: 15px; }
+      .answer-pill { padding: 6px 10px; font-size: 14px; }
+    }
   </style>
 </head>
 <body>
@@ -117,7 +134,6 @@ function sanitizeNumberInput(s) {
   s = String(s).trim();
   if (s.length === 0) return null;
   if (s[0] === '+') s = s.slice(1);
-  // only allow optional leading minus and digits 0-9
   if (!/^[\-]?[0-9]+$/.test(s)) return null;
   return s;
 }
@@ -195,4 +211,3 @@ function generateAndCheck(){
 </script>
 </body>
 </html>
-
