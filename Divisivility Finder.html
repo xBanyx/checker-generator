@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Simple Divisibility Finder</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      padding: 30px; 
+      background: #e9eef5; 
+      display: flex;
+      justify-content: center;
+    }
+    .box { 
+      background: #ffffff; 
+      padding: 25px; 
+      border-radius: 14px; 
+      width: 100%;
+      max-width: 640px; 
+      box-shadow: 0 4px 18px rgba(0,0,0,0.12); 
+    }
+    h2, h3 {
+      text-align: center;
+      margin: 8px 0 14px 0;
+      color: #1a2b5a;
+    }
+    label { display:block; margin-top:8px; color:#233; }
+    input[type=text], input[type=number] { 
+      padding: 12px;
+      width: 100%; 
+      font-size: 18px; 
+      margin-top: 6px;
+      border-radius: 8px;
+      border: 1px solid #c9d3e0;
+      outline: none;
+      box-sizing: border-box;
+    }
+    input[type=text]:focus, input[type=number]:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 4px #a9c4ff;
+    }
+    .row { display:flex; gap:10px; align-items:center; }
+    .row .small { width: 140px; }
+    button { 
+      margin-top: 12px; 
+      padding: 10px 12px; 
+      font-size: 16px; 
+      border: none; 
+      border-radius: 8px; 
+      background: #2563eb; 
+      color: white; 
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    button.secondary { background: #6b7280; }
+    button:hover { transform: translateY(-1px); }
+
+    .section-title {
+      font-size: 18px;
+      margin-top: 18px;
+      margin-bottom: 8px;
+      color: #1a2b5a;
+      font-weight: bold;
+    }
+    .result, .tips { 
+      padding: 12px; 
+      background: #f4f7ff; 
+      border-radius: 10px;
+      border: 1px solid #d6e2ff;
+      font-size: 16px;
+      line-height: 1.6;
+      min-height:44px;
+    }
+    .tips {
+      background: #fff7da;
+      border-left: 5px solid #ffcf4d;
+      border-top: 1px solid #ffe9a6;
+    }
+    .answers-row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+    .answer-pill { padding:8px 12px; background:#fff; border-radius:20px; border:1px solid #d6e2ff; font-weight:600; }
+    small.note { color:#445; display:block; margin-top:8px }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Simple Divisibility Finder</h2>
+
+    <label for="num">Enter a number (integers only):</label>
+    <input id="num" type="text" placeholder="e.g. 1248 — you can paste very large integers" />
+
+    <div id="finderButtons" class="row">
+      <button onclick="checkDivisibility()">Check</button>
+      <button class="secondary" onclick="clearAll()">Clear</button>
+    </div>
+
+    <div class="section-title">Divisible By</div>
+    <div id="answerArea" class="result">
+      <div id="answers" class="answers-row">None</div>
+    </div>
+
+    <div class="section-title">Tips</div>
+    <div id="tipArea" class="tips">No applicable tips.</div>
+
+    <h3 style="margin-top:26px">Random Number Generator</h3>
+    <label for="digits">Digits (4–12):</label>
+    <input id="digits" type="number" min="4" max="12" value="6" class="small" />
+    <div id="generatorButtons" class="row" style="margin-top:8px">
+      <button onclick="generateRandom()">Generate</button>
+      <button class="secondary" onclick="generateAndCheck()">Generate & Check</button>
+    </div>
+    <small class="note">Generate fills the number input. Generate & Check fills and then runs the finder automatically.</small>
+
+  </div>
+
+<script>
+function sanitizeNumberInput(s) {
+  s = String(s).trim();
+  if (s.length === 0) return null;
+  if (s[0] === '+') s = s.slice(1);
+  // only allow optional leading minus and digits 0-9
+  if (!/^[\-]?[0-9]+$/.test(s)) return null;
+  return s;
+}
+
+function checkDivisibility() {
+  const raw = document.getElementById("num").value;
+  const sanitized = sanitizeNumberInput(raw);
+  if (sanitized === null) { alert('Please enter a valid integer (no decimals or letters).'); return; }
+
+  let n;
+  try { n = BigInt(sanitized); } catch(e) { alert('Number too large or invalid.'); return; }
+
+  const rules = {
+    2: "The last digit is an even number (0,2,4,6,8).",
+    3: "The sum of all the digits is divisible by 3.",
+    4: "The number formed by the last two digits is divisible by 4.",
+    5: "The last digit is either 0 or 5.",
+    6: "The number must be divisible by both 2 and 3.",
+    8: "The number formed by the last three digits is divisible by 8.",
+    9: "The sum of all the digits is divisible by 9.",
+    10:"The last digit is 0."
+  };
+  const divisors = [2,3,4,5,6,8,9,10];
+
+  const answersEl = document.getElementById('answers');
+  const tipEl = document.getElementById('tipArea');
+  answersEl.innerHTML = '';
+  let any = false;
+  let tipsHTML = '';
+
+  divisors.forEach(function(d) {
+    if (n % BigInt(d) === 0n) {
+      any = true;
+      var pill = document.createElement('div');
+      pill.className = 'answer-pill';
+      pill.textContent = d;
+      answersEl.appendChild(pill);
+
+      tipsHTML += '<strong>By ' + d + ':</strong> ' + rules[d] + '<br>';
+    }
+  });
+
+  if (!any) {
+    answersEl.textContent = 'None';
+    tipEl.innerHTML = 'No applicable tips.';
+  } else {
+    tipEl.innerHTML = tipsHTML;
+  }
+}
+
+function clearAll(){
+  document.getElementById('num').value = '';
+  document.getElementById('answers').textContent = 'None';
+  document.getElementById('tipArea').textContent = 'No applicable tips.';
+}
+
+function randomDigits(digits) {
+  var s = '';
+  s += String(Math.floor(Math.random()*9)+1);
+  for (var i=1;i<digits;i++) s += String(Math.floor(Math.random()*10));
+  return s;
+}
+
+function generateRandom(){
+  var digits = parseInt(document.getElementById('digits').value) || 6;
+  var d = Math.max(4, Math.min(12, digits));
+  var s = randomDigits(d);
+  document.getElementById('num').value = s;
+}
+
+function generateAndCheck(){
+  generateRandom();
+  checkDivisibility();
+}
+</script>
+</body>
+</html>
